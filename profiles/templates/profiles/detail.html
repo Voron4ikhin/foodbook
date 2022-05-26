@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}
+profile detail
+{% endblock title %}
+
+{% block content %}
+
+<div class="ui segment">
+    <h2>{{object.user}}</h2>
+    <div class="ui grid">
+        <div class="row">
+            <div class="four wide column">
+                <div class="but">
+                    <img class="ui medium rounded image" src="{{object.avatar.url}}">
+                    <div class="row mt-5">
+                        {% if object.user not in rel_receiver and object.user not in rel_sender %}
+                            <form action="{% url 'profile:send-invite' %}" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="profile_pk" value="{{object.pk}}">
+                                <button type="submit" class="ui orange button update-button">
+                                    Добавить в друзья
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        {% if object.user in rel_receiver and request.user not in object.friends.all %}
+                            <button class="ui disabled button w-big update-button"><i class="user icon"></i>Заявка отправлена</button>
+                        {% endif %}
+                        {% if object.user in rel_sender and request.user not in object.friends.all %}
+                        <div class="ui floating update-button orange icon dropdown button">
+                          <span class="text">Отправил заявку</span>
+                          <div class="menu">
+                            <div class="item">
+                              <form action="{% url 'profile:accept-invite' %}" method="POST">
+                                  {% csrf_token %}
+                                  <input type="hidden" name="profile_pk" value="{{object.pk}}">
+                                  <button type="submit" class="ui orange button update-button">
+                                    Принять заявку
+                                  </button>
+                                </form>
+                          </div>
+                            <div class="item">
+                              <form action="{% url 'profile:reject-invite' %}" method="POST">
+                                  {% csrf_token %}
+                                  <input type="hidden" name="profile_pk" value="{{object.pk}}">
+                                  <button class="ui orange button update-button" type="submit">
+                                    Отклонить заявку
+                                  </button>
+                              </form>
+                          </div>
+                          </div>
+                        </div>
+                        {% endif %}
+                        {% if request.user in object.friends.all %}
+                            <form action="{% url 'profile:remove-friend' %}" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="profile_pk" value="{{object.pk}}">
+                                <button type="submit" class="ui  orange button update-button">
+                                    Удалить из друзей
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                    <div class="row mt-5">
+                        <a href="{{object.get_absolute_url_foodbook}}"><button class="ui orange button update-button">Книга рецептов {{object.user}}</button></a>
+                    </div>
+                    <div class="ui vertical fluid menu">
+                        <div class="item">
+                            Друзей
+                            <div class="ui label">
+                                {{object.get_friends_no}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="twelve wide column">
+                <table class="ui orange table">
+                    <tbody>
+                        <tr>
+                            <td>Ник</td>
+                            <td>{{object.user}}</td>
+                        </tr>
+                        <tr>
+                            <td>Звание</td>
+                            {% if object.first_name  %}
+                            <td>{{object.profession}}</td>
+                             {% else %}
+                             <td>Не указано</td>
+                             {% endif %}
+                        </tr>
+                         <tr>
+                            <td>Имя</td>
+                             {% if object.first_name  %}
+                            <td>{{object.first_name}}</td>
+                             {% else %}
+                             <td>Не указано</td>
+                             {% endif %}
+                        </tr>
+                        <tr>
+                            <td>Фамилия</td>
+                            {% if object.first_name  %}
+                            <td>{{object.second_name}}</td>
+                             {% else %}
+                             <td>Не указано</td>
+                             {% endif %}
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="ui orange table">
+                    <tbody>
+                         <tr>
+                            <td>Информация</td>
+                            <td>{{object.bio}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="ui orange table">
+                    <tbody>
+                        <tr>
+                            <td>Количество рецептов</td>
+                            <div class="six wide column">
+                            <td>{{object.get_posts_no}}</td>
+                            </div>
+                        </tr>
+                        <tr>
+                            <td>Количество полученных лайков</td>
+                            <td>{{object.get_likes_received_no}}</td>
+                        </tr>
+
+                        <tr>
+                            <td>Количество поставиленных лайков</td>
+                            <td>{{object.get_likes_given_no}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="ui segment">
+    {% if is_empty%}
+    <div class="ui message">
+      <div class="header">
+        У пользователя еще нет постов
+      </div>
+    </div>
+    {% endif %}
+    <div class="ui grid">
+        <div class="row">
+            {% for post in posts %}
+            <div class="four wide column mb-38">
+                <div class="ui special cards">
+                  <div class="card mb-5">
+                    <div class="blurring dimmable image">
+                      <div class="ui dimmer">
+                        <div class="content">
+                          <div class="center">
+                              <a href="{{post.get_absolute_url}}"><div class="ui inverted orange button">Смотреть</div></a>
+<!--                              {% url 'posts:post-update' post.pk %}-->
+                          </div>
+                        </div>
+                      </div>
+                        {% if post.image %}
+                            <img src={{post.image.url}}>
+                        {% else %}
+                            <img src="{{ MEDIA_URL }}no_image.png">
+                        {% endif %}
+                    </div>
+                    <div class="content centerial-like-name">
+                        <div class="header"><a href="{{post.get_absolute_url}}">{{post}}</a></div>
+                        <div class="flex-post-short">
+                            <span> {{ post.num_comments }} comments</span>
+                            <div class="right floated like-recept-my-profile">
+                                <form action="{% url 'posts:like-post-view' %}" method="POST" class='like-form' id='{{post.id}}'>
+                                    {% csrf_token %}
+                                    <input type="hidden" name="post_id" value={{post.id}}>
+
+                                        {% if profile not in post.liked.all %}
+                                            <button type="submit" class="ui orange button like-btn{{post.id}}">Like {{post.num_likes}}</button>
+                                        {% else %}
+                                            <button type="submit" class="ui button like-btn{{post.id}}"> Unlike {{post.num_likes}}</button>
+                                        {% endif %}
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        </div>
+    </div>
+
+{% endblock content %}

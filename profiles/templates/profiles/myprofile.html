@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+
+
+{% block title %}
+my profile
+{% endblock title %}
+
+{% block content %}
+{% url 'posts:liked_posts_view' as liked_posts %}
+<!-- MODAL -->
+<div class="ui united modal mymodal" id="modal1">
+    <i class="close icon"></i>
+    <div class="header">
+        Profile Picture
+    </div>
+    <div class="image content">
+        <div class="ui medium image">
+            <img src="{{profile.avatar.url}}">
+        </div>
+        <div class="description">
+            <div class="ui header">Provide some additional/new info about you</div>
+            <form action="" method="POST" class="ui form" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+        </div>
+    </div>
+    <div class="actions">
+        <button type="submit" class="ui positive right labeled icon button" >
+            Update
+            <i class="checkmark icon"></i>
+        </button>
+        </form>
+    </div>
+</div>
+
+
+<div class="ui united modal mymodal" id="modal2">
+    <i class="close icon"></i>
+    <div class="header">
+        Добавить рецепт
+    </div>
+    <div class="content">
+
+        <form action="" method="POST" class='ui form' enctype="multipart/form-data">
+            {% csrf_token %}
+            {{p_form.as_p}}
+            <button type='submit' name="submit_p_form" class="ui positive button w-full mt-5">Send</button>
+        </form>
+    </div>
+</div>
+
+
+
+<div class="ui segment">
+    <h3>{{ request.user }}</h3>
+    <div class="ui grid">
+        <div class="row">
+            <div class="four wide column">
+                <div class="but">
+                    <img class="ui medium rounded image" src="{{profile.avatar.url}}">
+                    <div class="row mt-5">
+                        <button class="ui orange button update-button" data-modal="modal1" id="modal-btn">Редактировать профиль</button>
+                    </div>
+                    <div class="row mt-5">
+                        <a href="{{liked_posts}}"><button class="ui orange button update-button">Моя книга рецептов</button></a>
+                    </div>
+                </div>
+                <div class="ui vertical fluid menu">
+                        <div class="item">
+                            Друзей
+                            <div class="ui label">
+                                {{profile.get_friends_no}}
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <div class="twelve wide column">
+                <table class="ui orange table">
+                    <tbody>
+                        <tr>
+                            <td>Ник</td>
+                            <td>{{profile.user}}</td>
+                        </tr>
+                        <tr>
+                            <td>Звание</td>
+                            {% if profile.first_name  %}
+                            <td>{{profile.profession}}</td>
+                             {% else %}
+                             <td>Не указано</td>
+                             {% endif %}
+                        </tr>
+                         <tr>
+                            <td>Имя</td>
+                             {% if profile.first_name  %}
+                            <td>{{profile.first_name}}</td>
+                             {% else %}
+                             <td>Не указано</td>
+                             {% endif %}
+                        </tr>
+                        <tr>
+                            <td>Фамилия</td>
+                            {% if profile.first_name  %}
+                            <td>{{profile.second_name}}</td>
+                             {% else %}
+                             <td>Не указано</td>
+                             {% endif %}
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="ui orange table">
+                    <tbody>
+                         <tr>
+                            <td>Информация</td>
+                            <td>{{profile.bio}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="ui orange table">
+                    <tbody>
+                        <tr>
+                            <td>Количество рецептов</td>
+                            <div class="six wide column">
+                            <td>{{profile.get_posts_no}}</td>
+                            </div>
+                        </tr>
+                        <tr>
+                            <td>Количество полученных лайков</td>
+                            <td>{{profile.get_likes_received_no}}</td>
+                        </tr>
+
+                        <tr>
+                            <td>Количество поставиленных лайков</td>
+                            <td>{{profile.get_likes_given_no}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="ui segment">
+    <div class="ui grid">
+        <div class="row">
+            <div class="four wide column">
+                <div class="ui special cards">
+                  <div class="card">
+                    <div class="blurring dimmable image add-recept">
+                      <div class="ui dimmer">
+                        <div class="content">
+                          <div class="center">
+                            <div class="ui inverted orange button" data-modal="modal2" id="modal-btn2">Добавить</div>
+                          </div>
+                        </div>
+                      </div>
+                        <img src="{{ MEDIA_URL }}plus.svg">
+                    </div>
+
+                  </div>
+                </div>
+            </div>
+            {% for post in posts %}
+            <div class="four wide column mb-38">
+                <div class="ui special cards">
+                  <div class="card mb-5">
+                    <div class="blurring dimmable image">
+                      <div class="ui dimmer">
+                        <div class="content">
+                          <div class="center">
+                              <a href="{% url 'posts:post-update' post.pk %}"><div class="ui inverted orange button">Изменить</div></a>
+                              <a href="{% url 'posts:post-delete' post.pk %}"><div class="ui inverted orange button">Удалить</div></a>
+                          </div>
+                        </div>
+                      </div>
+                        {% if post.image %}
+                            <img src={{post.image.url}}>
+                        {% else %}
+                            <img src="{{ MEDIA_URL }}no_image.png">
+                        {% endif %}
+                    </div>
+                    <div class="content centerial-like-name">
+                        <div class="header"><a href="{{post.get_absolute_url}}">{{post}}</a></div>
+                        <div class="flex-post-short">
+                            <span> {{ post.num_comments }} comments</span>
+                            <div class="right floated like-recept-my-profile">
+                                <form action="{% url 'posts:like-post-view' %}" method="POST" class='like-form' id='{{post.id}}'>
+                                    {% csrf_token %}
+                                    <input type="hidden" name="post_id" value={{post.id}}>
+
+                                        {% if profile not in post.liked.all %}
+                                            <button type="submit" class="ui orange button like-btn{{post.id}}">Like {{post.num_likes}}</button>
+                                        {% else %}
+                                            <button type="submit" class="ui button like-btn{{post.id}}"> Unlike {{post.num_likes}}</button>
+                                        {% endif %}
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+
+{% if confirm %}
+    <div class="ui green message">your profile has been update</div>
+{% endif %}
+
+{% endblock content %}

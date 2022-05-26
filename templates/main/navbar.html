@@ -1,0 +1,66 @@
+{% url 'main-post-view' as path_to_home %}
+{% url 'posts:main-post-view' as path_to_posts %}
+{% url 'profile:my-profile-view' as path_to_my_profile %}
+{% url 'profile:my-invites-view' as path_to_my_invites %}
+{% url 'profile:invite-profiles-view' as path_to_invites %}
+{% url 'profile:all-profiles-view' as path_to_all_profiles %}
+{% url 'profile:my-friends-view' as path_to_my_friends %}
+
+<div class="ui inverted orange menu nav mb-7">
+  <div class="ui container">
+    <a href="{{path_to_home}}" class="{% if request.path == path_to_home %}active{% endif %} item">
+        <h3>foodbook</h3>
+    </a>
+    {% if request.user.is_authenticated %}
+    <a href="{{path_to_posts}}" class="{% if request.path == path_to_posts %}active{% endif %} item">
+        Рецепты друзей
+    </a>
+    {% endif %}
+
+    <div class="right menu">
+        {% if request.user.is_authenticated %}
+        <div class="item">
+            <div class="ui floating dropdown icon button orange"> Друзья
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    <a href="{{path_to_my_friends}}" class="item">
+                        Мои друзья
+                    </a>
+                    <a href="{{path_to_all_profiles}}" class="item">
+                        Все пользователи
+                    </a>
+                    <a href="{{path_to_invites}}" class="item">
+                        Исходящие заявки &nbsp; <div class="ui purple horizontal label">{{send_invites_num}}</div>
+                    </a>
+                    <a href="{{path_to_my_invites}}" class="item">
+                        Запросы в друзья &nbsp; <div class="ui purple horizontal label">{{invites_num}}</div>
+                    </a>
+                </div>
+             </div>
+        </div>
+             <div class="item">
+              <form action="{{path_to_home}}" method="GET">
+                <div class="ui action left icon input">
+                <input class="prompt" type="text" name='search' placeholder="Поиск...">
+                <i class="search icon"></i>
+                <button type='submit' class="ui button">Искать</button>
+                </div>
+            </form>
+            </div>
+
+            <a href="{{path_to_my_profile}}" class="{% if request.path == path_to_my_profile %}active{% endif %} item">
+                <img src="{{picture.url}}" class="ui avatar image">&nbsp;
+                 {{ request.user }}
+            </a>
+
+            <a href="{% url 'account_logout' %}" class="ui item">
+                Выйти
+            </a>
+        {% else %}
+        <a href="{% url 'account_login' %}" class="ui item">
+                Войти
+            </a>
+        {% endif %}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}
+all profiles
+{% endblock title %}
+
+{% block content %}
+<div class="ui grid">
+    <div class="two wide column">
+    </div>
+    <div class="twelve wide column">
+        {% if is_empty %}
+        <div class="ui message">
+          <div class="header">
+            Других пользователей нет.
+          </div>
+        </div>
+        {% endif %}
+        {% for obj in object_list %}
+        <div class="ui segment">
+            <div class="ui grid">
+                <div class="four wide column">
+                    <img class="ui small circular image" src="{{obj.avatar.url}}">
+                </div>
+                <div class="eight wide column">
+                    <a href="{{obj.get_absolute_url}}"><h3>{{obj.user}}</h3></a>
+                        <p>{{obj.bio}}</p>
+                        {% if obj.user not in rel_receiver and obj.user not in rel_sender %}
+                            <form action="{% url 'profile:send-invite' %}" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="profile_pk" value="{{obj.pk}}">
+                                <button type="submit" class="ui orange button mb-5 w-big">
+                                    Добавить в друзья
+                                </button>
+                            </form>
+                        {% endif %}
+                        {% if obj.user in rel_sender and request.user not in obj.friends.all %}
+                        <div class="ui floating update-button orange icon dropdown button">
+                          <span class="text">Отправил заявку</span>
+                          <div class="menu">
+                            <div class="item">
+                              <form action="{% url 'profile:accept-invite' %}" method="POST">
+                                  {% csrf_token %}
+                                  <input type="hidden" name="profile_pk" value="{{obj.pk}}">
+                                  <button type="submit" class="ui orange button update-button">
+                                    Принять заявку
+                                  </button>
+                                </form>
+                          </div>
+                            <div class="item">
+                              <form action="{% url 'profile:reject-invite' %}" method="POST">
+                                  {% csrf_token %}
+                                  <input type="hidden" name="profile_pk" value="{{obj.pk}}">
+                                  <button class="ui orange button update-button" type="submit">
+                                    Отклонить заявку
+                                  </button>
+                              </form>
+                          </div>
+                          </div>
+                        </div>
+                        {% endif %}
+
+                        {% if obj.user in rel_receiver and request.user not in obj.friends.all %}
+                            <button class="ui disabled button mb-5 w-big"><i class="user icon"></i>Заявка отправлена</button>
+                        {% endif %}
+                        {% if request.user in obj.friends.all %}
+                            <form action="{% url 'profile:remove-friend' %}" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="profile_pk" value="{{obj.pk}}">
+                                <button type="submit" class="ui orange button mb-5 w-big">
+                                    Удалить из друзей
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}
+my foodbook
+{% endblock title %}
+
+{% block content %}
+
+<div class="ui segment">
+    {% if is_empty %}
+    <div class="ui message">
+      <div class="header">
+        Кулинарная книга пуста!
+      </div>
+      <p>Здесь появятся рецепты как только пользователь {{profile.user}} добавит что-то в свою кулинарную книгу!</p>
+    </div>
+    {% endif %}
+    <div class="ui grid">
+        <div class="row">
+            {% for post in qs %}
+            <div class="four wide column mb-38">
+                <div class="ui special cards">
+                  <div class="card mb-5">
+                    <div class="blurring dimmable image">
+                      <div class="ui dimmer">
+                        <div class="content">
+                          <div class="center">
+                              <a href="{{post.get_absolute_url}}"><div class="ui inverted orange button">Смотреть</div></a>
+<!--                              {% url 'posts:post-update' post.pk %}-->
+                          </div>
+                        </div>
+                      </div>
+                        {% if post.image %}
+                            <img src={{post.image.url}}>
+                        {% else %}
+                            <img src="{{ MEDIA_URL }}no_image.png">
+                        {% endif %}
+                    </div>
+                    <div class="content centerial-like-name">
+                        <div class="header"><a href="{{post.get_absolute_url}}">{{post}}</a></div>
+                        <div class="flex-post-short">
+                            <span> {{ post.num_comments }} comments</span>
+                            <div class="right floated like-recept-my-profile">
+                                <form action="{% url 'posts:like-post-view' %}" method="POST" class='like-form' id='{{post.id}}'>
+                                    {% csrf_token %}
+                                    <input type="hidden" name="post_id" value={{post.id}}>
+
+                                        {% if profile not in post.liked.all %}
+                                            <button type="submit" class="ui orange button like-btn{{post.id}}">Like {{post.num_likes}}</button>
+                                        {% else %}
+                                            <button type="submit" class="ui button like-btn{{post.id}}"> Unlike {{post.num_likes}}</button>
+                                        {% endif %}
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        </div>
+    </div>
+{% endblock content %}
+{% block scripts %}
+    <script>
+        $( document ).ready(function() {
+            let display = false
+            $(".cmt_btn").click(function () {
+                if (display===false) {
+                    $(this).next(".comment-box").show("slow");
+                    display=true
+                } else {
+                    $(this).next(".comment-box").hide("slow");
+                    display=false
+                }
+            });
+
+            $('.like-form').submit(function(e){
+                e.preventDefault()
+
+                const post_id = $(this).attr('id')
+
+                const likeText = $(`.like-btn${post_id}`).text()
+                const trim = $.trim(likeText)
+
+                const url = $(this).attr('action')
+
+                let res;
+                const likes = $(`.like-count${post_id}`).text()
+                const trimCount = parseInt(likes)
+
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: {
+                        'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+                        'post_id':post_id,
+                    },
+                    success: function(response) {
+                        if(trim === 'Unlike') {
+                            $(`.like-btn${post_id}`).text('Like')
+                            res = trimCount - 1
+                        } else {
+                            $(`.like-btn${post_id}`).text('Unlike')
+                            res = trimCount + 1
+                        }
+
+                        $(`.like-count${post_id}`).text(res)
+                    },
+                    error: function(response) {
+                        console.log('error', response)
+                    }
+                })
+
+            })
+        });
+    </script>
+{% endblock scripts %}
