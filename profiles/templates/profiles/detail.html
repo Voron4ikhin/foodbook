@@ -66,12 +66,12 @@ profile detail
                         <a href="{{object.get_absolute_url_foodbook}}"><button class="ui orange button update-button">Книга рецептов {{object.user}}</button></a>
                     </div>
                     <div class="ui vertical fluid menu">
-                        <div class="item">
+                        <a class="item" href="{% url 'profile:users-friends' object.slug %}">
                             Друзей
                             <div class="ui label">
                                 {{object.get_friends_no}}
                             </div>
-                        </div>
+                        </a>
                     </div>
                 </div>
             </div>

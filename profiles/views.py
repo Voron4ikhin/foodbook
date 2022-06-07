@@ -212,3 +212,33 @@ def my_friends_view(request):
         'is_empty': is_empty,
     }
     return render(request, 'profiles/myfriends.html', context)
+
+
+@login_required
+def users_friends(request, slug):
+    user = Profile.objects.get(slug=slug)
+    requester = Profile.objects.get(user=request.user)
+    pre_qs = []
+    for item in user.friends.all():
+        pre_qs.append(item)
+
+    qs = Profile.objects.filter(user__in=pre_qs)
+    is_empty = False
+    if len(qs) == 0:
+        is_empty = True
+    rel_r = Relationship.objects.filter(sender=requester)
+    rel_s = Relationship.objects.filter(receiver=requester)
+    rel_receiver = []
+    rel_sender = []
+    for item in rel_r:
+        rel_receiver.append(item.receiver.user)
+    for item in rel_s:
+        rel_sender.append(item.sender.user)
+    context = {
+        'qs': qs,
+        'is_empty': is_empty,
+        'profile': user,
+        'rel_receiver': rel_receiver,
+        'rel_sender': rel_sender
+    }
+    return render(request, 'profiles/users_friends.html', context)

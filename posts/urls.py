@@ -1,10 +1,11 @@
 from django.urls import path
-from .views import post_comment_create_and_list_view, like_unlike_post, PostDeleteView, PostUpdateView, liked_posts_list_view, food_book_detail_view, PostDetailView
+from .views import post_comment_create_and_list_view, like_unlike_post, PostDeleteView, PostUpdateView, liked_posts_list_view, food_book_detail_view, PostDetailView, search_posts
 
 app_name = 'posts'
 
 urlpatterns = [
     path('', post_comment_create_and_list_view, name='main-post-view'),
+    path('search/', search_posts, name='search-posts'),
     path('myfoodbook/', liked_posts_list_view, name='liked_posts_view'),
     path('liked', like_unlike_post, name='like-post-view'),
     path('<pk>/', PostDetailView.as_view(), name='detail-post'),

@@ -31,7 +31,11 @@
 
                 </div>
                 <img class="ui avatar image" src={{obj.author.avatar.url}}>
-                {{ obj.author.user }} - {{ obj.created|timesince}}
+                {% if obj.author == profile %}
+                <a href="{% url 'profile:my-profile-view' %}">{{ obj.author.user }}</a> - {{ obj.created|timesince}}
+                {% else %}
+                 <a href="{{obj.author.get_absolute_url}}">{{ obj.author.user }}</a> - {{ obj.created|timesince}}
+                {% endif %}
             </div>
             <div class="ui fluid image">
                 {% if obj.image %}
@@ -39,7 +43,7 @@
                 {% endif %}
             </div>
             <div class="content">
-                <h2> <a href="{{post.author.get_absolute_url}}">{{ obj.name }}</a> </h2>
+                <h2> <a href="{{obj.get_absolute_url}}">{{ obj.name }}</a> </h2>
                 <div class="right floated">
                     <form action="{% url 'posts:like-post-view' %}" method="POST" class='like-form' id='{{obj.id}}'>
                         {% csrf_token %}
@@ -53,13 +57,20 @@
                     </form>
                 </div>
                 <i class="comment icon"></i>
-                <span> {{ obj.num_comments }} comments</span>
+                {% if obj.num_comments == 0 %}
+                <span> Нет комментариев </span>
+                {% elif obj.num_comments == 1 %}
+                <span> {{ obj.num_comments }} комментарий </span>
+                {% elif obj.num_comments < 5  %}
+                 <span> {{ obj.num_comments }} комментария </span>
+                {% else %}
+                <span> {{ obj.num_comments }} комментариев </span>
+                {% endif %}
+
             </div>
             <div class="extra content">
-                <div class="mb-5">
-                  
-                </div>
-                <button class="cmt_btn ui button mb-5">show / hide comments</button>
+                {% if obj.num_comments != 0 %}
+                <button class="cmt_btn ui button mb-5">Комментарии</button>
                 <div class="comment-box">
                 {% if obj.comment_set.all %}
                     {% for c in obj.comment_set.all %}
@@ -73,12 +84,13 @@
                     {% endfor %}
                 {% endif %}
                 </div>
-  
+                {% endif %}
+
                 <form action="" method="POST"class='ui fluid form'>
                     {% csrf_token %}
-                    <input type="hidden" name="post_id" value={{obj.id}}>
+                    <input type="hidden" name="post_id" value={{obj.id}} placeholder="Написать комментарий...">
                     {{ c_form }}
-                    <button type="submit" name="submit_c_form" class="ui orange  button mt-5 w-full">Send</button>
+                    <button type="submit" name="submit_c_form" class="ui orange  button mt-5 w-full">Отправить</button>
                 </form>
             </div>
         </div>

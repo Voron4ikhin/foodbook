@@ -28,8 +28,9 @@ class ProfileManager(models.Manager):
         return profiles
 
     def get_friends_profiles(self, me):
-        profiles = Profile.objects.filter(friends=me).exclude(user=me)
+        profiles = Profile.objects.filter(friends=me)
         return profiles
+
 
 
 class Profile(models.Model):

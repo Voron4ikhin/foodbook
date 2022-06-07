@@ -11,6 +11,7 @@ from .views import (
     accept_invitation,
     reject_invitation,
     my_friends_view,
+    users_friends,
 )
 
 
@@ -20,6 +21,7 @@ urlpatterns = [
     path('', ProfileListView.as_view(), name='all-profiles-view'),
     path('myprofile/', my_profile_view, name='my-profile-view'),
     path('myfriends/', my_friends_view, name='my-friends-view'),
+    path('frineds/<slug>/', users_friends, name='users-friends'),
     path('myinvites/', invites_received_view, name='my-invites-view'),
     path('to-invite/', invite_profiles_list_view, name='invite-profiles-view'),
     path('send-invite/', send_invitation, name='send-invite'),

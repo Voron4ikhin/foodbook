@@ -1,4 +1,5 @@
 {% url 'main-post-view' as path_to_home %}
+{% url 'posts:search-posts' as path_to_search %}
 {% url 'posts:main-post-view' as path_to_posts %}
 {% url 'profile:my-profile-view' as path_to_my_profile %}
 {% url 'profile:my-invites-view' as path_to_my_invites %}
@@ -39,7 +40,7 @@
              </div>
         </div>
              <div class="item">
-              <form action="{{path_to_home}}" method="GET">
+              <form action="{{path_to_search}}" method="GET">
                 <div class="ui action left icon input">
                 <input class="prompt" type="text" name='search' placeholder="Поиск...">
                 <i class="search icon"></i>

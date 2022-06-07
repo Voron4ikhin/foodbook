@@ -9,7 +9,7 @@ from PIL import Image
 class Post(models.Model):
     name = models.CharField(blank=True, max_length=100)
     content = models.TextField()
-    image = models.ImageField(upload_to='posts', validators=[FileExtensionValidator(['png', 'jpg', 'jpeg'])],   )
+    image = models.ImageField(upload_to='posts', validators=[FileExtensionValidator(['png', 'jpg', 'jpeg'])],)
     liked = models.ManyToManyField(Profile, blank=True, related_name='likes')
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -50,7 +50,7 @@ class Post(models.Model):
         print(self.image)
         if(self.image):
             img = Image.open(self.image.path)
-            new_img = self.crop_center(img, 1200, 1200)
+            new_img = self.crop_center(img, 800, 800)
             new_img.save(self.image.path)
 
     class Meta:

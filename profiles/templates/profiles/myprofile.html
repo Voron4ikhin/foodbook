@@ -12,14 +12,14 @@ my profile
 <div class="ui united modal mymodal" id="modal1">
     <i class="close icon"></i>
     <div class="header">
-        Profile Picture
+        {{profile}}
     </div>
     <div class="image content">
         <div class="ui medium image">
             <img src="{{profile.avatar.url}}">
         </div>
         <div class="description">
-            <div class="ui header">Provide some additional/new info about you</div>
+            <div class="ui header">Редктирование профиля</div>
             <form action="" method="POST" class="ui form" enctype="multipart/form-data">
                 {% csrf_token %}
                 {{ form.as_p }}
@@ -27,7 +27,7 @@ my profile
     </div>
     <div class="actions">
         <button type="submit" class="ui positive right labeled icon button" >
-            Update
+            Обновить
             <i class="checkmark icon"></i>
         </button>
         </form>
@@ -67,12 +67,12 @@ my profile
                     </div>
                 </div>
                 <div class="ui vertical fluid menu">
-                        <div class="item">
+                        <a class="item" href="{% url 'profile:my-friends-view' %}">
                             Друзей
                             <div class="ui label">
                                 {{profile.get_friends_no}}
                             </div>
-                        </div>
+                        </a>
                     </div>
             </div>
             <div class="twelve wide column">

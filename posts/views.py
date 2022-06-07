@@ -7,6 +7,7 @@ from .forms import PostModelForm, CommentModelForm
 from django.views.generic import UpdateView, DeleteView, DetailView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
 from django.contrib.auth.models import User
 
 
@@ -115,6 +116,11 @@ def like_unlike_post(request):
             like.value = 'Like'
             post_obj.save()
             like.save()
+
+        data = {
+            'value': like.value,
+            'likes': post_obj.liked.all().count()
+        }
         return redirect(request.META.get('HTTP_REFERER'))
     return redirect('posts:main-post-view')
 
@@ -154,9 +160,28 @@ class PostDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         pk = self.kwargs.get('pk')
-        print(pk)
         post = Post.objects.get(pk=pk)
+        author = Profile.objects.get(posts=post)
+        components = post.components.split(',')
+        lines = post.content.split('\n')
+        lines_empty = False
+        if len(lines) > 1:
+            lines_empty = True
+        c_form = CommentModelForm()
+        if 'submit_c_form' in self.request.POST:
+            c_form = CommentModelForm(self.request.POST)
+            if c_form.is_valid():
+                instance = c_form.save(commit=False)
+                instance.user = self.request.user
+                instance.post = post
+                instance.save()
+                c_form = CommentModelForm()
         context['post'] = post
+        context['c_form'] = c_form
+        context['components'] = components
+        context['lines'] = lines
+        context['lines_empty'] = lines_empty
+        context['author'] = author
         return context
 
 
@@ -222,3 +247,45 @@ def food_book_detail_view(request, slug):
         'is_empty': is_empty,
     }
     return render(request, 'posts/foodbook.html', context)
+
+@login_required
+def search_posts(request):
+
+    search_query = request.GET.get('search', )
+    profile = Profile.objects.get(user=request.user)
+    qs = []
+    if search_query:
+        qs = Post.objects.filter(name__icontains=search_query)
+    is_empty = False
+    if len(qs) == 0:
+        is_empty = True
+
+    p_form = PostModelForm()
+    c_form = CommentModelForm()
+
+    if 'submit_p_form' in request.POST:
+        p_form = PostModelForm(request.POST, request.FILES)
+        if p_form.is_valid():
+            instance = p_form.save(commit=False)
+            instance.author = profile
+            instance.save()
+            p_form = PostModelForm()
+
+    if 'submit_c_form' in request.POST:
+        c_form = CommentModelForm(request.POST)
+        if c_form.is_valid():
+            instance = c_form.save(commit=False)
+            instance.user = profile
+            instance.post = Post.objects.get(id=request.POST.get('post_id'))
+            instance.save()
+            c_form = CommentModelForm()
+
+    context = {
+        'qs': qs,
+        'is_empty': is_empty,
+        'profile': profile,
+        'p_form': p_form,
+        'c_form': c_form,
+    }
+
+    return render(request, 'posts/search.html', context)
